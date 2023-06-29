@@ -1,19 +1,20 @@
 import ContactList from './ContackList/ContactList'
 import ContactForm from './ContactForm/ContactForm'
 import Filter from './Filter/Filter'
-import { addContact, deleteContact, filterContact} from 'redux/phoneBookSlise';
-import { useDispatch, useSelector } from 'react-redux';
+import {fetchContacts} from 'redux/contactOperation';
+import { useDispatch, useSelector} from 'react-redux';
+import {useEffect} from 'react';
 
 const App = () => {
-  const dispatch = useDispatch()
-  const filter = useSelector(state => state.contacts.filter)
-  const contacts = useSelector(state => state.contacts.contacts)
+  const dispatch = useDispatch();
+  const isLoading = useSelector(state => state.contacts.isLoading);
+  const error = useSelector(state => state.contacts.error);
 
-  const visibleContacts = () => {
-    return contacts.filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()));
-  }
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
-  return (
+    return (
     <div
       style={{
         height: '100vh',
@@ -24,11 +25,11 @@ const App = () => {
       }}
     >
       <h1>Phonebook</h1>
-      <ContactForm onSubmitForm={(data) => dispatch(addContact(data))}/>
+      <ContactForm/>
       <h2>Contacts</h2>
-      <Filter  value={filter} onChange={(e) => dispatch(filterContact(e))}/>
-      <ContactList contacts={visibleContacts()} 
-      onDeleteContact={(contactId) => dispatch(deleteContact(contactId))}/>
+      <Filter/>
+      {isLoading && !error && <b>Request in progress...</b>}
+      <ContactList/>
     </div>
   )};
 

@@ -1,31 +1,43 @@
 import {useState} from 'react';
-import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import {addContact} from 'redux/contactOperation';
+import { nanoid } from 'nanoid';
 import { Form } from './ContactForm.styled';
 
-export default function ContactForm({onSubmitForm}) {
+export default function ContactForm() {
+  const dispatch = useDispatch()
+  const contacts = useSelector(state => state.contacts.items)
   const[name,setName] = useState('');
-  const[number,setNumber] = useState('');
+  const[phone,setPhone] = useState('');
     
   const handleOnChange = e => {
     const {value} = e.currentTarget
     if(e.currentTarget.name === 'name') {
       setName(value)
     }
-    if(e.currentTarget.name === 'number') {
-      setNumber(value)
+    if(e.currentTarget.name === 'phone') {
+      setPhone(value)
     }        
   };
 
   const onSubmit = e => {
     e.preventDefault();
-    const data = {name: `${name}`, number: `${number}`}
-    onSubmitForm(data)
+    const contact = {id: nanoid(), name: `${name}`, phone: `${phone}`}
+    
+    const filterResult = contacts.find(prevContact =>
+      prevContact.name.toLowerCase().trim() ===
+      contact.name.toLowerCase().trim() ||
+      prevContact.phone.trim() === contact.phone.trim()
+    )
+    if(filterResult)
+      alert(`${contact.name}: is already in contacts`)
+    else dispatch(addContact(contact))
     reset()
   };
 
   const reset = () => {
     setName('');
-    setNumber('')
+    setPhone('')
   }
 
   return (
@@ -42,23 +54,19 @@ export default function ContactForm({onSubmitForm}) {
           id={name}
         />
         </label>
-      <label htmlFor={number}>Number
+      <label htmlFor={phone}>Number
         <input 
           type="tel"
-          name="number" 
-          value={number}
+          name="phone" 
+          value={phone}
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}" 
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +" 
           required
           onChange={handleOnChange}
-          id={number}
+          id={phone}
         />
       </label>
       <button type="submit">Add contact</button>
     </Form>
   )   
 }
-
-ContactForm.propTypes = {
-  onSubmitForm: PropTypes.func,
-};

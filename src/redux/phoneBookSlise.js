@@ -1,52 +1,48 @@
 import {createSlice} from '@reduxjs/toolkit'
-import storage from 'redux-persist/lib/storage'
-import { persistReducer } from 'redux-persist'
-import { nanoid } from 'nanoid';
+import {fetchContacts, addContact, deleteContact} from 'redux/contactOperation'
 
-const contactsBase = [ 
-    {id: 'id-1', name: 'Rozie Simpson', number: '459-12-56'},
-    {id: 'id-2', name: 'Hermione Kline', number: '443-89-12'},
-    {id: 'id-3', name: 'Eden Klements', number: '645-17-79'},
-    {id: 'id-4', name: 'Annie Copelsnd', number: '227-91-26'},
-]
+const handlePending = state => {
+    state.isLoading = true;
+  };
+  
+const handleRejected = (state, action) => {
+    state.isLoading = false;
+    state.error = action.payload;
+};
 
 const phoneBookSlice = createSlice({
     name: 'phoneBook',
     initialState: {
-        contacts: contactsBase,
-        filter: "",
+        items: [],
+        isLoading: false,
+        error: null,
     },
-    reducers: {
-        addContact(state, action) {          
-            const contact = {
-                id: nanoid(),
-                name: action.payload.name,
-                number: action.payload.number,
-            };
-            const filterResult = state.contacts.find(prevContact =>
-                prevContact.name.toLowerCase().trim() ===
-                contact.name.toLowerCase().trim() ||
-                prevContact.number.trim() === contact.number.trim()
-            )
-            if(filterResult)
-                alert(`${contact.name}: is already in contacts`)
-            else state.contacts = [contact, ...state.contacts]
+    extraReducers: {
+        [fetchContacts.pending]: handlePending,
+        [fetchContacts.fulfilled](state, action) {
+            state.isLoading = false;
+            state.error = null;
+            state.items = action.payload;
         },
-        deleteContact(state, action) {
-            state.contacts = state.contacts.filter(contact => contact.id !== action.payload)
+        [fetchContacts.rejected]: handleRejected,
+        [addContact.pending]: handlePending,
+        [addContact.fulfilled](state, action) {
+            state.isLoading = false;
+            state.error = null;
+            state.items.push(action.payload);
         },
-        filterContact(state, action) {
-            state.filter = action.payload.currentTarget.value
-        }, 
-    },
+        [addContact.rejected]: handleRejected,
+        [deleteContact.pending]: handlePending,
+        [deleteContact.fulfilled](state, action) {
+            state.isLoading = false;
+            state.error = null;
+            const index = state.items.findIndex(
+                contact =>contact.id === action.payload
+              );
+            state.items.splice(index, 1);
+        },
+        [deleteContact.rejected]: handleRejected,
+    },     
 })
-
-const persistConfig = {
-    key: 'root',
-    storage,
-    whitelist: ['contacts']
-}
   
-export const contactsReducer = persistReducer(persistConfig, phoneBookSlice.reducer)
-  
-export const {addContact, deleteContact, filterContact} = phoneBookSlice.actions
+export const contactsReducer = phoneBookSlice.reducer
