@@ -14,7 +14,7 @@ const App = () => {
     dispatch(fetchContacts());
   }, [dispatch]);
 
-    return (
+  return (
     <div
       style={{
         height: '100vh',
@@ -31,6 +31,7 @@ const App = () => {
       {isLoading && !error && <b>Request in progress...</b>}
       <ContactList/>
     </div>
-  )};
+  )
+};
 
-  export default App
+export default App

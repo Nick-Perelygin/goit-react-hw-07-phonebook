@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit'
 
 const filterSlice = createSlice({
     name: 'searchFilter',
-    initialState: {filter: ""},
+    initialState: {filter: ''},
     reducers: {
         filterContact(state, action) {
             state.filter = action.payload.currentTarget.value

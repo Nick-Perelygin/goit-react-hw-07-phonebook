@@ -22,7 +22,7 @@ export default function ContactForm() {
 
   const onSubmit = e => {
     e.preventDefault();
-    const contact = {id: nanoid(), name: `${name}`, phone: `${phone}`}
+    const contact = {name: `${name}`, phone: `${phone}`, id: nanoid()}
     
     const filterResult = contacts.find(prevContact =>
       prevContact.name.toLowerCase().trim() ===
